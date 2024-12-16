@@ -111,4 +111,24 @@ The dataset used in this project is from [Kaggle](https://www.kaggle.com/dataset
 
 The code for this project was inspired by the repository found [here](https://github.com/SANJAYSS-SRM-26/Employee-Salary-Analysis-and-Visualization-Python-/tree/main).
 
+## Assignment1
+
+### Tasks Completed
+
+1. **Loading Data**: Loaded the employee salary data from a CSV file using Dask.
+2. **Cleaning Noisy Data**:
+   - Removed rows with missing values.
+   - Removed rows with incorrect values (e.g., negative salaries).
+   - Removed duplicate rows.
+   - Handled outliers by removing salaries that are extremely high or low compared to the rest of the data.
+   - Corrected typographical errors in employee names.
+   - Ensured consistent formatting of salary values.
+3. **Data Analysis**:
+   - Calculated the minimum salary.
+   - Calculated the maximum salary.
+   - Calculated the sum of all salaries.
+4. **Visualization**:
+   - Plotted line graphs and vertical bar graphs of employee names vs. salaries.
+   - Provided options to visualize data before and after cleaning to compare the differences.
+
 If you encounter any issues or need further assistance, feel free to reach out!
