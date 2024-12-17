@@ -1,19 +1,18 @@
-# Employee Salary Analysis and Visualization
+# Company Salary Analysis and Visualization
 
-This project loads employee salary data, analyzes it, and visualizes it using Python and the Pandas and Matplotlib libraries.
+This project loads company salary data, analyzes it, and visualizes it using Python, Dask, and Matplotlib libraries.
 
 ## Requirements
 
 - Python 3.x
-- Pandas
+- Dask
 - Matplotlib
 
-<br>
-<br>
+---
 
-# Installation
+## Installation
 
-## Git Repository
+### Git Repository
 
 To clone the repository and get started, use the following commands:
 
@@ -22,7 +21,7 @@ git clone https://github.com/abdulrahmanRadan/data-science.git
 cd data-science
 ```
 
-## Project Structure
+### Project Structure
 
 ```
 data-science/
@@ -31,104 +30,144 @@ data-science/
     └── companies.csv
 ```
 
-- after git clone :
+---
 
-## Create environment
+### Create Environment
 
 1. Create and activate a virtual environment:
 
-- in data-science folder
+- In the `data-science` folder:
 
   ```sh
   python -m venv myenv
   ```
 
-2. and start the env
+2. Activate the environment:
 
-   - On Windows
+   - On Windows:
 
    ```sh
-   myenv\Scripts\activate  # On Windows
+   myenv\Scripts\activate
    ```
 
-   - On macOS or Linux
+   - On macOS or Linux:
 
    ```sh
-   source myenv/bin/activate  # On macOS or Linux
+   source myenv/bin/activate
    ```
 
 3. Install the required libraries:
+
    ```sh
-    pip install pandas matplotlib
+   pip install -r requirements.txt
    ```
+
+---
 
 ## Usage
 
-1. Download the CSV file containing employee data into the `assignment1` folder.
-2. Ensure the `employeesSheet.py` file is in the `assignment1` folder.
-3. Run the code:
+1. Ensure the `companies.csv` file is in the `assignment1` folder and has the required columns: `name`, `salary`, `rating`, and `reviews`.
+2. Run the program:
+
    ```sh
-    cd assignment1
-    python employeesSheet.py
+   cd assignment1
+   python employeesSheet.py
    ```
+
+3. Follow the on-screen prompts to interact with the program.
+
+---
 
 ## Code Description
 
-- **employeesSheet.py**: Contains the code that loads, analyzes, and visualizes the data.
-  - **mainmenu()**: Displays the main menu.
-  - **DataFrame()**: Displays the DataFrame.
-  - **DataAnalysis()**: Displays the data analysis menu.
-    - **Max()**: Displays the maximum salary.
-    - **Min()**: Displays the minimum salary.
-    - **Am()**: Displays the sum of salaries.
-  - **graphs()**: Displays the graphs menu.
-    - **line()**: Plots a line graph of the data.
-    - **barvertical()**: Plots a vertical bar graph of the data.
+- **employeesSheet.py**: Contains the code for loading, cleaning, analyzing, and visualizing the company salary data.
+
+### Main Menu
+
+1. **Display DataFrame**: Displays the cleaned DataFrame.
+2. **Data Analysis Menu**:
+   - **Min Salary**: Displays the minimum salary.
+   - **Max Salary**: Displays the maximum salary.
+   - **Sum of Salaries**: Displays the total sum of salaries.
+3. **Graphs Menu**:
+
+   - **Average Salary by Company Rating**: Visualizes the average salary grouped by company rating.
+   - **Average Salary by Number of Reviews (Grouped)**: Visualizes the average salary grouped by the number of reviews.
+   - **Average Number of Reviews by Company Rating**: Visualizes the average number of reviews for each company rating.
+
+4. **Exit**: Exits the program.
+
+### Data Cleaning
+
+- Removed rows with missing values.
+- Filtered out rows where salary is less than or equal to zero.
+- Removed salary outliers using the Interquartile Range (IQR) method.
+- Standardized employee names by trimming spaces and ensuring proper title case.
+- Ensured salary values are treated as floats for analysis.
+
+---
 
 ## Example Output
 
 ### Data Analysis Menu
 
-- **Max Salary**: Displays the maximum salary among employees.
-- **Min Salary**: Displays the minimum salary among employees.
-- **Sum of Salaries**: Displays the total sum of salaries.
+- **Min Salary**: Displays the lowest salary value.
+- **Max Salary**: Displays the highest salary value.
+- **Sum of Salaries**: Displays the total sum of all salaries in the dataset.
 
 ### Graphs Menu
 
-- **Line Graph**: Plots a line graph of employee names vs. salaries.
-- **Vertical Bar Graph**: Plots a vertical bar graph of employee names vs. salaries.
+1. **Average Salary by Company Rating**:
 
-## Notes
+   - Bar chart showing average salary per company rating.
 
-- Ensure that the CSV file (`companies.csv`) is in the correct format with the appropriate column names (`name` and `salary`).
-- The script provides a simple command-line interface to interact with the data and visualize it.
+2. **Average Salary by Number of Reviews (Grouped)**:
 
-## Data Source
+   - Bar chart showing average salary grouped by review count ranges (e.g., 0-50, 51-100).
 
-The dataset used in this project is from [Kaggle](https://www.kaggle.com/datasets/iqmansingh/company-employee-dataset).
+3. **Average Number of Reviews by Company Rating**:
+   - Bar chart showing the average number of reviews for each rating.
 
-## Code Inspiration
-
-The code for this project was inspired by the repository found [here](https://github.com/SANJAYSS-SRM-26/Employee-Salary-Analysis-and-Visualization-Python-/tree/main).
+---
 
 ## Assignment1
 
 ### Tasks Completed
 
-1. **Loading Data**: Loaded the employee salary data from a CSV file using Dask.
+1. **Loading Data**: Loaded the company salary data from a CSV file using **Dask**.
 2. **Cleaning Noisy Data**:
-   - Removed rows with missing values.
-   - Removed rows with incorrect values (e.g., negative salaries).
-   - Removed duplicate rows.
-   - Handled outliers by removing salaries that are extremely high or low compared to the rest of the data.
-   - Corrected typographical errors in employee names.
-   - Ensured consistent formatting of salary values.
+   - Removed rows with missing or invalid values.
+   - Filtered out rows with negative or zero salaries.
+   - Handled outliers using the Interquartile Range (IQR) method.
+   - Standardized and formatted names.
 3. **Data Analysis**:
    - Calculated the minimum salary.
    - Calculated the maximum salary.
-   - Calculated the sum of all salaries.
+   - Calculated the total sum of salaries.
 4. **Visualization**:
-   - Plotted line graphs and vertical bar graphs of employee names vs. salaries.
-   - Provided options to visualize data before and after cleaning to compare the differences.
+   - Plotted average salary by company rating.
+   - Plotted average salary grouped by number of reviews.
+   - Plotted average number of reviews by company rating.
+
+---
+
+## Notes
+
+- The `companies.csv` file should have the following columns:
+  - `name`: Name of the company or employee.
+  - `salary`: Salary of the employee (numeric).
+  - `rating`: Rating of the company.
+  - `reviews`: Number of reviews for the company.
+- Missing or invalid rows are cleaned as part of the data preparation process.
+
+---
+
+## Data Source
+
+The dataset used in this project is from [Kaggle](https://www.kaggle.com/datasets/iqmansingh/company-employee-dataset).
+
+---
 
 If you encounter any issues or need further assistance, feel free to reach out!
+
+---
