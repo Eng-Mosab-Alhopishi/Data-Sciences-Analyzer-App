@@ -123,3 +123,93 @@ print("All steps completed successfully. Log saved as 'data_processing_log.md'."
 
 
 
+
+
+/////////////////////////////////part 2 later//////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# الحصول على المسار الحالي للمشروع
+project_dir = os.path.dirname(os.path.abspath(__file__))
+
+# تحميل البيانات من الملف CSV
+data = pd.read_csv(os.path.join(project_dir, "cleaned_data.csv"))
+
+# تحويل القيم في "MaritalStatus" إلى أرقام: Single -> 0, Married -> 1, Divorced -> 2
+data['MaritalStatus'] = data['MaritalStatus'].map({'Single': 0, 'Married': 1, 'Divorced': 2})
+
+# حفظ البيانات المعدلة في نفس المجلد
+data.to_csv(os.path.join(project_dir, "cleaned_data.csv"), index=False)
+
+# عرض المعلومات الأساسية
+print("First 5 rows:")
+print(data.head())
+
+print("\nGeneral Information:")
+print(data.info())
+
+print("\nStatistical Summary:")
+print(data.describe())
+
+# إنشاء الرسومات وحفظها في نفس المجلد
+# رسم علاقة بين العمود "Age" و "Attrition"
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='Attrition', y='Age', data=data)
+plt.title('Age vs Attrition')
+plt.savefig(os.path.join(project_dir, "age_vs_attrition.png"))
+plt.show()
+
+# رسم علاقة بين "DistanceFromHome" و "Attrition"
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='Attrition', y='DistanceFromHome', data=data)
+plt.title('DistanceFromHome vs Attrition')
+plt.savefig(os.path.join(project_dir, "distance_from_home_vs_attrition.png"))
+plt.show()
+
+# رسم علاقة بين "Gender" و "Attrition"
+plt.figure(figsize=(10, 6))
+sns.countplot(x='Gender', hue='Attrition', data=data)
+plt.title('Gender vs Attrition')
+plt.savefig(os.path.join(project_dir, "gender_vs_attrition.png"))
+plt.show()
+
+# رسم علاقة بين "MaritalStatus" و "Attrition"
+plt.figure(figsize=(10, 6))
+sns.countplot(x='MaritalStatus', hue='Attrition', data=data)
+plt.title('MaritalStatus vs Attrition')
+plt.savefig(os.path.join(project_dir, "marital_status_vs_attrition.png"))
+plt.show()
+
+# حفظ المخرجات في ملف Markdown في نفس المجلد
+with open(os.path.join(project_dir, "analysis_report.md"), "w") as file:
+    file.write("# Data Analysis Report\n\n")
+    file.write("## Basic Information\n")
+    file.write(f"First 5 rows:\n{data.head()}\n\n")
+    file.write(f"General Information:\n{data.info()}\n\n")
+    file.write(f"Statistical Summary:\n{data.describe()}\n\n")
+
+    file.write("## Visualizations\n")
+    file.write("1. Age vs Attrition - Boxplot\n")
+    file.write("![Age vs Attrition](age_vs_attrition.png)\n\n")
+    file.write("2. DistanceFromHome vs Attrition - Boxplot\n")
+    file.write("![DistanceFromHome vs Attrition](distance_from_home_vs_attrition.png)\n\n")
+    file.write("3. Gender vs Attrition - Countplot\n")
+    file.write("![Gender vs Attrition](gender_vs_attrition.png)\n\n")
+    file.write("4. MaritalStatus vs Attrition - Countplot\n")
+    file.write("![MaritalStatus vs Attrition](marital_status_vs_attrition.png)\n\n")
+
+print("Process Completed Successfully!")

@@ -10,12 +10,12 @@ Data loaded successfully.
 
 ```
 First 5 rows:
-   Age Attrition  ... YearsSinceLastPromotion YearsWithCurrManager
-0   41       Yes  ...                       0                    5
-1   49        No  ...                       1                    7
-2   37       Yes  ...                       0                    0
-3   33        No  ...                       3                    0
-4   27        No  ...                       2                    2
+   Age Attrition     BusinessTravel              Department  ...  WorkLifeBalance  YearsAtCompany YearsSinceLastPromotion YearsWithCurrManager
+0   41       Yes      Travel_Rarely                   Sales  ...                1               6                       0                    5
+1   49        No  Travel_Frequently  Research & Development  ...                3              10                       1                    7
+2   37       Yes      Travel_Rarely  Research & Development  ...                3               0                       0                    0
+3   33        No  Travel_Frequently  Research & Development  ...                3               8                       3                    0
+4   27        No      Travel_Rarely  Research & Development  ...                3               2                       2                    2
 
 [5 rows x 24 columns]
 
@@ -23,15 +23,15 @@ Column Info:
 None
 
 General Statistics:
-               Age  DistanceFromHome  ...  YearsSinceLastPromotion  YearsWithCurrManager
-count  1470.000000       1470.000000  ...              1470.000000           1470.000000
-mean     36.923810          9.192517  ...                 2.187755              4.123129
-std       9.135373          8.106864  ...                 3.222430              3.568136
-min      18.000000          1.000000  ...                 0.000000              0.000000
-25%      30.000000          2.000000  ...                 0.000000              2.000000
-50%      36.000000          7.000000  ...                 1.000000              3.000000
-75%      43.000000         14.000000  ...                 3.000000              7.000000
-max      60.000000         29.000000  ...                15.000000             17.000000
+               Age  DistanceFromHome    Education     JobLevel  ...  WorkLifeBalance  YearsAtCompany  YearsSinceLastPromotion  YearsWithCurrManager
+count  1470.000000       1470.000000  1470.000000  1470.000000  ...      1470.000000     1470.000000              1470.000000           1470.000000
+mean     36.923810          9.192517     2.912925     2.063946  ...         2.761224        7.008163                 2.187755              4.123129
+std       9.135373          8.106864     1.024165     1.106940  ...         0.706476        6.126525                 3.222430              3.568136
+min      18.000000          1.000000     1.000000     1.000000  ...         1.000000        0.000000                 0.000000              0.000000
+25%      30.000000          2.000000     2.000000     1.000000  ...         2.000000        3.000000                 0.000000              2.000000
+50%      36.000000          7.000000     3.000000     2.000000  ...         3.000000        5.000000                 1.000000              3.000000
+75%      43.000000         14.000000     4.000000     3.000000  ...         3.000000        9.000000                 3.000000              7.000000
+max      60.000000         29.000000     5.000000     5.000000  ...         4.000000       40.000000                15.000000             17.000000
 
 [8 rows x 16 columns]
 ```
@@ -78,15 +78,15 @@ One-Hot Encoding performed on columns: ['BusinessTravel', 'Department', 'Educati
 
 ```
 General Statistics after processing:
-               Age  DistanceFromHome  ...  YearsSinceLastPromotion  YearsWithCurrManager
-count  1470.000000       1470.000000  ...              1470.000000           1470.000000
-mean     36.923810          9.192517  ...                 2.187755              4.123129
-std       9.135373          8.106864  ...                 3.222430              3.568136
-min      18.000000          1.000000  ...                 0.000000              0.000000
-25%      30.000000          2.000000  ...                 0.000000              2.000000
-50%      36.000000          7.000000  ...                 1.000000              3.000000
-75%      43.000000         14.000000  ...                 3.000000              7.000000
-max      60.000000         29.000000  ...                15.000000             17.000000
+               Age  DistanceFromHome    Education     JobLevel  ...  WorkLifeBalance  YearsAtCompany  YearsSinceLastPromotion  YearsWithCurrManager
+count  1470.000000       1470.000000  1470.000000  1470.000000  ...      1470.000000     1470.000000              1470.000000           1470.000000
+mean     36.923810          9.192517     2.912925     2.063946  ...         2.761224        7.008163                 2.187755              4.123129
+std       9.135373          8.106864     1.024165     1.106940  ...         0.706476        6.126525                 3.222430              3.568136
+min      18.000000          1.000000     1.000000     1.000000  ...         1.000000        0.000000                 0.000000              0.000000
+25%      30.000000          2.000000     2.000000     1.000000  ...         2.000000        3.000000                 0.000000              2.000000
+50%      36.000000          7.000000     3.000000     2.000000  ...         3.000000        5.000000                 1.000000              3.000000
+75%      43.000000         14.000000     4.000000     3.000000  ...         3.000000        9.000000                 3.000000              7.000000
+max      60.000000         29.000000     5.000000     5.000000  ...         4.000000       40.000000                15.000000             17.000000
 
 [8 rows x 16 columns]
 No invalid values detected in MonthlyIncome.
