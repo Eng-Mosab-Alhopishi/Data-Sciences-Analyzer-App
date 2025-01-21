@@ -70,7 +70,7 @@ data-science/
 2. Run the program:
 
    ```sh
-   cd final
+   cd final/data-pre
    python datap.py
    ```
 
