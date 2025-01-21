@@ -70,8 +70,8 @@ data-science/
 2. Run the program:
 
    ```sh
-   cd assignment1
-   python employeesSheet.py
+   cd final
+   python datap.py
    ```
 
 3. Follow the on-screen prompts to interact with the program.
