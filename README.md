@@ -22,6 +22,18 @@ This is a **Python-based application** designed for data processing, visualizati
   - Clear input fields and reset predictions for new inputs.
 
 ---
+## Screenshots
+
+### main interface
+![Main Interface](images/photo1.png)
+
+![Data processing](images/photo2.png)
+
+![Model training](images/photo4.png)
+
+![Data Visualization](images/photo3.png)
+
+![Prediction Tab](images/photo5.png)
 
 ## Requirements
 
