@@ -74,6 +74,7 @@ First, clone the repository to your local machine:
 
 ```bash
 git clone https://github.com/Eng-Mosab-Alhopishi/Data-Sciences-Analyzer-App.git
+# git clone https://github.com/radanpro/data-science.git
 ```
 
 <!-- ```bash
@@ -85,7 +86,7 @@ git clone https://github.com/radanpro/data-science.git
 Move into the project folder:
 
 ```bash
-cd data-science
+cd Data-Sciences-Analyzer-App
 ```
 
 ### 3. Set Up a Virtual Environment (Optional but Recommended)
@@ -118,6 +119,7 @@ Install the required libraries using the `requirements.txt` file:
 pip install -r requirements.txt
 ```
 
+or
 Alternatively, you can install the libraries manually:
 
 ```bash
