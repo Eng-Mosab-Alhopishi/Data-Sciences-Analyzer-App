@@ -1,173 +1,232 @@
-# Company Salary Analysis and Visualization
+# Data Processing and Visualization App
 
-This project loads company salary data, analyzes it, and visualizes it using Python, Dask, and Matplotlib libraries.
+This is a **Python-based application** designed for data processing, visualization, and machine learning predictions. It provides a user-friendly interface built with **Tkinter** for loading, processing, and analyzing datasets. The application also supports training and testing machine learning models, as well as making predictions based on user input.
+
+---
+
+## Features
+
+- **Data Loading**: Load datasets in CSV or Excel formats.
+- **Data Processing**:
+  - Handle missing values by dropping rows with null values.
+  - Encode categorical and target columns using Label Encoding.
+  - Balance datasets using Random Over-Sampling.
+  - Perform feature selection to identify the most relevant features.
+- **Data Visualization**:
+  - Plot histograms, scatter plots, and 3D scatter plots for up to 3 features.
+- **Machine Learning**:
+  - Train and test machine learning models (Random Forest or Deep Learning).
+  - Evaluate model performance using accuracy, precision, and recall metrics.
+- **Prediction**:
+  - Make predictions based on user input using the trained model.
+  - Clear input fields and reset predictions for new inputs.
+
+---
+
+## Screenshots
+
+### Main Interface
+
+![Main Interface](images/photo1.png)
+
+### Data Processing
+
+![Data Processing](images/photo2.png)
+
+### Model Training
+
+![Model Training](images/photo4.png)
+
+### Data Visualization
+
+![Data Visualization](images/photo3.png)
+
+### Prediction Tab
+
+![Prediction Tab](images/photo5.png)
+
+---
 
 ## Requirements
 
-- Python 3.x
-- Dask
-- Matplotlib
+To run this application, you need the following:
+
+- **Python 3.x** (Download and install Python from [here](https://www.python.org/downloads/)).
+- **Libraries**:
+  - `pandas`
+  - `scikit-learn`
+  - `tensorflow`
+  - `matplotlib`
+  - `seaborn`
+  - `tkinter`
+  - `imblearn`
+  - `numpy`
 
 ---
 
 ## Installation
 
-### Git Repository
+Follow these steps to set up and run the application:
 
-To clone the repository and get started, use the following commands:
+### 1. Clone the Repository
+
+First, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/radanme/data-science.git
+git clone https://github.com/radanpro/data-science.git
+```
+
+### 2. Navigate to the Project Directory
+
+Move into the project folder:
+
+```bash
 cd data-science
 ```
 
-### Project Structure
+### 3. Set Up a Virtual Environment (Optional but Recommended)
 
+To avoid conflicts with other Python projects, create a virtual environment:
+
+```bash
+python -m venv venv
 ```
-data-science/
-└── assignment1/
-    ├── employeesSheet.py
-    └── companies.csv
-```
 
----
+Activate the virtual environment:
 
-### Create Environment
+- On Windows:
 
-1. Create and activate a virtual environment:
-
-- In the `data-science` folder:
-
-  ```sh
-  python -m venv myenv
+  ```bash
+  venv\Scripts\activate
   ```
 
-2. Activate the environment:
+- On macOS/Linux:
 
-   - On Windows:
+  ```bash
+  source venv/bin/activate
+  ```
 
-   ```sh
-   myenv\Scripts\activate
-   ```
+### 4. Install Required Libraries
 
-   - On macOS or Linux:
+Install the required libraries using the `requirements.txt` file:
 
-   ```sh
-   source myenv/bin/activate
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-3. Install the required libraries:
+Alternatively, you can install the libraries manually:
 
-   ```sh
-   pip install -r requirements.txt
-   ```
+```bash
+pip install pandas scikit-learn tensorflow matplotlib seaborn imblearn numpy
+```
+
+### 5. Run the Application
+
+Once the libraries are installed, run the application:
+
+```bash
+python main.py
+```
 
 ---
 
 ## Usage
 
-1. Ensure the `companies.csv` file is in the `assignment1` folder and has the required columns: `name`, `salary`, `rating`, and `reviews`.
-2. Run the program:
+1. **Load Data**  
+   Click on the "Load Data" button to upload your dataset (CSV or Excel).
 
-   ```sh
-   cd final/data-pre
-   python datap.py
-   ```
+2. **Process Data**  
+   Select the target column from the dropdown menu.  
+   Click "Start Processing" to clean, encode, and balance the dataset.
 
-3. Follow the on-screen prompts to interact with the program.
+3. **Visualize Data**  
+   Select up to 3 features from the list.  
+   Click "Plot Data" to generate visualizations.
 
----
+4. **Train Model**  
+   Choose a model (Random Forest or Deep Learning).  
+   Click "Train Model" to train the selected model.
 
-## Code Description
+5. **Test Model**  
+   Click "Test Model" to evaluate the model's performance.
 
-- **employeesSheet.py**: Contains the code for loading, cleaning, analyzing, and visualizing the company salary data.
-
-### Main Menu
-
-1. **Display DataFrame**: Displays the cleaned DataFrame.
-2. **Data Analysis Menu**:
-   - **Min Salary**: Displays the minimum salary.
-   - **Max Salary**: Displays the maximum salary.
-   - **Sum of Salaries**: Displays the total sum of salaries.
-3. **Graphs Menu**:
-
-   - **Average Salary by Company Rating**: Visualizes the average salary grouped by company rating.
-   - **Average Salary by Number of Reviews (Grouped)**: Visualizes the average salary grouped by the number of reviews.
-   - **Average Number of Reviews by Company Rating**: Visualizes the average number of reviews for each company rating.
-
-4. **Exit**: Exits the program.
-
-### Data Cleaning
-
-- Removed rows with missing values.
-- Filtered out rows where salary is less than or equal to zero.
-- Removed salary outliers using the Interquartile Range (IQR) method.
-- Standardized employee names by trimming spaces and ensuring proper title case.
-- Ensured salary values are treated as floats for analysis.
+6. **Make Predictions**  
+   Enter feature values in the prediction tab.  
+   Click "Predict" to see the prediction result.  
+   Click "New Prediction" to clear the input fields and reset the result.
 
 ---
 
-## Example Output
+## File Structure
 
-### Data Analysis Menu
+Here’s an overview of the project structure:
 
-- **Min Salary**: Displays the lowest salary value.
-- **Max Salary**: Displays the highest salary value.
-- **Sum of Salaries**: Displays the total sum of all salaries in the dataset.
-
-### Graphs Menu
-
-1. **Average Salary by Company Rating**:
-
-   - Bar chart showing average salary per company rating.
-
-2. **Average Salary by Number of Reviews (Grouped)**:
-
-   - Bar chart showing average salary grouped by review count ranges (e.g., 0-50, 51-100).
-
-3. **Average Number of Reviews by Company Rating**:
-   - Bar chart showing the average number of reviews for each rating.
+```
+repository-name/
+│
+├── main.py                # Main application script
+├── requirements.txt       # List of required libraries
+├── README.md              # Project documentation
+├── LICENSE                # License file
+├── .gitignore             # Files to ignore in Git
+├── data/                  # Folder for sample datasets (optional)
+└── images/                # Folder for screenshots (optional)
+```
 
 ---
 
-## Assignment1
+## License
 
-### Tasks Completed
-
-1. **Loading Data**: Loaded the company salary data from a CSV file using **Dask**.
-2. **Cleaning Noisy Data**:
-   - Removed rows with missing or invalid values.
-   - Filtered out rows with negative or zero salaries.
-   - Handled outliers using the Interquartile Range (IQR) method.
-   - Standardized and formatted names.
-3. **Data Analysis**:
-   - Calculated the minimum salary.
-   - Calculated the maximum salary.
-   - Calculated the total sum of salaries.
-4. **Visualization**:
-   - Plotted average salary by company rating.
-   - Plotted average salary grouped by number of reviews.
-   - Plotted average number of reviews by company rating.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ---
 
-## Notes
+## Contributing
 
-- The `companies.csv` file should have the following columns:
-  - `name`: Name of the company or employee.
-  - `salary`: Salary of the employee (numeric).
-  - `rating`: Rating of the company.
-  - `reviews`: Number of reviews for the company.
-- Missing or invalid rows are cleaned as part of the data preparation process.
+Contributions are welcome! If you'd like to contribute, please follow these steps:
 
----
-
-## Data Source
-
-The dataset used in this project is from [Kaggle](https://www.kaggle.com/datasets/iqmansingh/company-employee-dataset).
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Commit your changes.
+4. Push your changes to the branch.
+5. Submit a pull request.
 
 ---
 
-If you encounter any issues or need further assistance, feel free to reach out!
+## Contact
+
+For any questions or feedback, feel free to reach out:
+
+- **Email**: your-email@example.com
+- **GitHub**: your-username
 
 ---
+
+### How to Use This `README.md`
+
+1. Copy the content above into a file named `README.md` in your project folder.
+2. Replace placeholders like `username`, `repository-name`, and `your-email@example.com` with your actual details.
+3. Add screenshots of your application to the `images/` folder and link them in the **Screenshots** section.
+4. Push the updated `README.md` to your GitHub repository.
+
+---
+
+### Example of a Screenshot Section
+
+If you want to add screenshots, you can use the following format in the **Screenshots** section:
+
+```markdown
+## Screenshots
+
+### Main Interface
+
+![Main Interface](images/main_interface.png)
+
+### Data Visualization
+
+![Data Visualization](images/visualization.png)
+
+### Prediction Tab
+
+![Prediction Tab](images/prediction_tab.png)
+```
