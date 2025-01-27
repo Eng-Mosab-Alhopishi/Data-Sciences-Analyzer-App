@@ -85,13 +85,13 @@ pip install -r requirements.txt
 Alternatively, you can install the libraries manually:
 
 bash
-Copy
+
 pip install pandas scikit-learn tensorflow matplotlib seaborn imblearn numpy
 5. Run the Application
 Once the libraries are installed, run the application:
 
 bash
-Copy
+
 python main.py
 Usage
 1. Load Data
