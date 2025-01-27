@@ -73,8 +73,12 @@ Follow these steps to set up and run the application:
 First, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/radanpro/data-science.git
+git clone https://github.com/Eng-Mosab-Alhopishi/Data-Sciences-Analyzer-App.git
 ```
+
+<!-- ```bash
+git clone https://github.com/radanpro/data-science.git
+``` -->
 
 ### 2. Navigate to the Project Directory
 
