@@ -17,7 +17,7 @@ This project loads company salary data, analyzes it, and visualizes it using Pyt
 To clone the repository and get started, use the following commands:
 
 ```bash
-git clone https://github.com/abdulrahmanRadan/data-science.git
+git clone https://github.com/radanme/data-science.git
 cd data-science
 ```
 
