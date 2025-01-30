@@ -1,25 +1,45 @@
 # Data Processing and Visualization App
 
-This is a **Python-based application** designed for data processing, visualization, and machine learning predictions. It provides a user-friendly interface built with **Tkinter** for loading, processing, and analyzing datasets. The application also supports training and testing machine learning models, as well as making predictions based on user input.
+This is a **Python-based application** designed for data processing, visualization, and machine learning predictions. It provides a user-friendly interface built with **streamlit** for loading, processing, and analyzing datasets. The application also supports training and testing machine learning models, as well as making predictions based on user input.
+
+**Advanced Data Processing & Predictive Modeling Toolkit**
+
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28.0-FF4B4B)](https://streamlit.io/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ---
 
 ## Features
 
 - **Data Loading**: Load datasets in CSV or Excel formats.
+
 - **Data Processing**:
   - Handle missing values by dropping rows with null values.
   - Encode categorical and target columns using Label Encoding.
   - Balance datasets using Random Over-Sampling.
   - Perform feature selection to identify the most relevant features.
+
+   **Algorithm Choices**:
+  - Random Forest (Customizable trees/depth)
+  - Neural Networks (Flexible architecture builder)
+
+- **Performance Metrics**:
+  - Accuracy, Precision, Recall, F1-Score
+  - Interactive Confusion Matrix
+  - Classification Report
+
+
 - **Data Visualization**:
   - Plot histograms, scatter plots, and 3D scatter plots for up to 3 features.
+
 - **Machine Learning**:
   - Train and test machine learning models (Random Forest or Deep Learning).
   - Evaluate model performance using accuracy, precision, and recall metrics.
-- **Prediction**:
-  - Make predictions based on user input using the trained model.
-  - Clear input fields and reset predictions for new inputs.
+- **Prediction**
+- **Single Prediction**: Interactive input form with real-time results
+- **Batch Prediction**: CSV upload with downloadable results
+- **Confidence Scores**: Probability visualization for predictions
 
 ---
 
@@ -131,7 +151,7 @@ pip install pandas scikit-learn tensorflow matplotlib seaborn imblearn numpy
 Once the libraries are installed, run the application:
 
 ```bash
-python main.py
+streamlit run  main.py
 ```
 
 ---
