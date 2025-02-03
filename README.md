@@ -15,22 +15,25 @@ This is a **Python-based application** designed for data processing, visualizati
 - **Data Loading**: Load datasets in CSV or Excel formats.
 
 - **Data Processing**:
+
   - Handle missing values by dropping rows with null values.
   - Encode categorical and target columns using Label Encoding.
   - Balance datasets using Random Over-Sampling.
   - Perform feature selection to identify the most relevant features.
 
-   **Algorithm Choices**:
+    **Algorithm Choices**:
+
   - Random Forest (Customizable trees/depth)
   - Neural Networks (Flexible architecture builder)
 
 - **Performance Metrics**:
+
   - Accuracy, Precision, Recall, F1-Score
   - Interactive Confusion Matrix
   - Classification Report
 
-
 - **Data Visualization**:
+
   - Plot histograms, scatter plots, and 3D scatter plots for up to 3 features.
 
 - **Machine Learning**:
@@ -151,7 +154,7 @@ pip install pandas scikit-learn tensorflow matplotlib seaborn imblearn numpy
 Once the libraries are installed, run the application:
 
 ```bash
-streamlit run  main.py
+python datap.py
 ```
 
 ---
