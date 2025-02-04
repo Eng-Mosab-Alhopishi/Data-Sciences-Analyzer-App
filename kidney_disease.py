@@ -29,12 +29,12 @@ print(f"Data after dropping missing values: {data.shape}")
 label_encoder = LabelEncoder()
 
 # Apply label encoding to the target column ('class') and other categorical columns
-data['Attrition'] = label_encoder.fit_transform(data['Attrition'])  # Target column
+data['Class'] = label_encoder.fit_transform(data['Class'])  # Target column
 
 # Convert other categorical variables to numerical (if needed)
-X = data.drop('Attrition', axis=1)
+X = data.drop('Class', axis=1)
 X = pd.get_dummies(X)  # One-hot encode categorical features
-y = data['Attrition']
+y = data['Class']
 
 # Balancing the dataset using RandomOverSampler (instead of SMOTE)
 ros = RandomOverSampler(random_state=42)
