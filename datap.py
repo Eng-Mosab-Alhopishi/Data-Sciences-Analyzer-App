@@ -3,7 +3,9 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import RandomOverSampler, SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.pipeline import Pipeline
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
@@ -24,12 +26,11 @@ import time
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Initialize session state
 def initialize_session_state():
     session_vars = [
         'data', 'processed_data', 'model', 'label_encoder',
         'selected_features', 'target_column', 'test_size',
-        'show_splash', 'num_classes'
+        'show_splash', 'num_classes', 'class_distribution'
     ]
     for var in session_vars:
         if var not in st.session_state:
@@ -38,7 +39,6 @@ def initialize_session_state():
     if 'show_splash' not in st.session_state:
         st.session_state.show_splash = True
 
-# Custom CSS with modern design
 def inject_custom_css():
     st.markdown(f"""
     <style>
@@ -99,10 +99,6 @@ def inject_custom_css():
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }}
 
-    .st-emotion-cache-keje6e {{
-        z-index: 2 !important;
-    }}
-
     .loading-spinner {{
         width: 50px;
         height: 50px;
@@ -121,34 +117,31 @@ def inject_custom_css():
 
 def main():
     st.set_page_config(
-        page_title="AI Data Analyzer",
+        page_title="AI Data Analyzer Pro",
         page_icon="🤖",
         layout="wide",
         initial_sidebar_state="expanded"
     )
-
+    
     initialize_session_state()
     inject_custom_css()
 
-    # Splash screen logic
     if st.session_state.show_splash:
         show_splash_screen()
         time.sleep(2)
         st.session_state.show_splash = False
         st.rerun()
 
-    st.title("🤖 AI-Powered Data Analysis & Modeling")
+    st.title("🤖 AI-Powered Data Analysis & Modeling Pro")
     
-    # Footer
     st.markdown("""
     <div class="footer">
         🚀 Developed by <span style="color: var(--primary); font-weight: bold;">ENG - MOSAB AL-hopishi</span> | 
         📧 Contact: example@email.com | 
-        🔧 Version 4.0
+        🔧 Version 5.1
     </div>
     """, unsafe_allow_html=True)
 
-    # Navigation
     pages = {
         "📁 Data Upload": data_upload,
         "⚙️ Processing": data_processing,
@@ -164,9 +157,9 @@ def show_splash_screen():
     st.markdown("""
     <div class="splash-screen">
         <div style="text-align: center;">
-            <h1 style="color: var(--primary); margin-bottom: 30px; font-size: 2.5em;">🧠 AI Data Analyzer</h1>
+            <h1 style="color: var(--primary); margin-bottom: 30px; font-size: 2.5em;">🧠 AI Data Analyzer Pro</h1>
             <div class="loading-spinner"></div>
-            <p style="color: var(--text); margin-top: 20px; font-size: 1.2em;">Initializing Application Components...</p>
+            <p style="color: var(--text); margin-top: 20px; font-size: 1.2em;">Initializing Advanced Components...</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -192,11 +185,10 @@ def data_upload():
                     df = pd.read_excel(uploaded_file)
                 
                 st.session_state.data = df
-                process_time = time.time() - start_time
+                st.session_state.class_distribution = df[df.columns[-1]].value_counts().to_dict()
                 
                 st.success(f"✅ Successfully loaded {len(df)} records")
                 
-                # Data summary cards
                 cols = st.columns(4)
                 with cols[0]:
                     with st.container(border=True):
@@ -211,7 +203,6 @@ def data_upload():
                     with st.container(border=True):
                         st.metric("Missing Values", df.isnull().sum().sum())
 
-                # Data preview
                 with st.expander("🔍 Preview First 10 Rows", expanded=False):
                     st.dataframe(df.head(10), use_container_width=True)
 
@@ -231,7 +222,6 @@ def data_processing():
     with st.form("processing_form"):
         st.subheader("Processing Configuration")
         
-        # Target selection
         target_col = st.selectbox(
             "🎯 Select Target Column", 
             df.columns,
@@ -239,7 +229,6 @@ def data_processing():
         )
         st.session_state.target_column = target_col
 
-        # Configuration columns
         col1, col2 = st.columns(2)
         with col1:
             with st.container(border=True):
@@ -259,11 +248,33 @@ def data_processing():
 
         with col2:
             with st.container(border=True):
-                st.markdown("### ⚖️ Balancing")
-                balance_data = st.checkbox(
-                    "Balance Classes",
-                    value=True,
-                    help="Apply RandomOverSampler"
+                st.markdown("### ⚖️ Advanced Balancing")
+                
+                if st.session_state.class_distribution:
+                    st.write("**Class Distribution:**")
+                    for cls, count in st.session_state.class_distribution.items():
+                        st.write(f"- Class {cls}: {count} samples")
+                
+                if st.session_state.num_classes and st.session_state.num_classes > 2:
+                    balance_options = [
+                        "None",
+                        "RandomOverSampler",
+                        "SMOTE",
+                        "SMOTE + OverSampler"
+                    ]
+                else:
+                    balance_options = [
+                        "None",
+                        "RandomOverSampler",
+                        "RandomUnderSampler",
+                        "SMOTE",
+                        "SMOTE + UnderSampling"
+                    ]
+                    
+                balance_method = st.selectbox(
+                    "Balance Method",
+                    balance_options,
+                    help="Auto-adjusted based on class distribution"
                 )
                 
                 st.markdown("### 🔍 Feature Selection")
@@ -275,7 +286,6 @@ def data_processing():
                     help="ANOVA F-value based selection"
                 )
 
-        # Advanced options
         with st.expander("⚙️ Advanced Settings"):
             test_size = st.slider(
                 "Test Set Size (%)",
@@ -289,7 +299,7 @@ def data_processing():
             try:
                 with st.spinner('Processing data...'):
                     start_time = time.time()
-                    process_data(df, target_col, k_features, balance_data, encode_cat)
+                    process_data(df, target_col, k_features, balance_method, encode_cat)
                     process_time = time.time() - start_time
                     
                     st.toast(f'🎉 Processing completed in {process_time:.2f}s!', icon='✅')
@@ -298,7 +308,6 @@ def data_processing():
             except Exception as e:
                 st.error(f"❌ Processing failed: {str(e)}")
 
-    # Download button outside the form
     if st.session_state.processed_data is not None:
         with st.container(border=True):
             st.markdown("### 📤 Export Processed Data")
@@ -311,8 +320,7 @@ def data_processing():
                 use_container_width=True
             )
 
-@st.cache_data
-def process_data(df, target_col, k_features, balance_data, encode_cat):
+def process_data(df, target_col, k_features, balance_method, encode_cat):
     processed_df = df.copy()
     
     # Handle missing values
@@ -336,9 +344,47 @@ def process_data(df, target_col, k_features, balance_data, encode_cat):
     y = processed_df[target_col]
     
     # Balance classes
-    if balance_data:
-        ros = RandomOverSampler(random_state=42)
-        X, y = ros.fit_resample(X, y)
+    if balance_method != "None":
+        sampling_strategy = get_sampling_strategy(y, balance_method)
+        
+        if balance_method == "RandomOverSampler":
+            ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+            X, y = ros.fit_resample(X, y)
+            
+        elif balance_method == "RandomUnderSampler":
+            rus = RandomUnderSampler(sampling_strategy=sampling_strategy, random_state=42)
+            X, y = rus.fit_resample(X, y)
+            
+        elif balance_method == "SMOTE":
+            self_healing_smote(X, y, sampling_strategy)
+            
+        elif balance_method == "SMOTE + OverSampler":
+            pipeline = Pipeline([
+                ('smote', SMOTE(
+                    sampling_strategy=0.75,
+                    k_neighbors=dynamic_neighbors(y),
+                    random_state=42
+                )),
+                ('over', RandomOverSampler(
+                    sampling_strategy=sampling_strategy,
+                    random_state=42
+                ))
+            ])
+            X, y = pipeline.fit_resample(X, y)
+            
+        elif balance_method == "SMOTE + UnderSampling":
+            pipeline = Pipeline([
+                ('smote', SMOTE(
+                    sampling_strategy=0.75,
+                    k_neighbors=dynamic_neighbors(y),
+                    random_state=42
+                )),
+                ('under', RandomUnderSampler(
+                    sampling_strategy=sampling_strategy,
+                    random_state=42
+                ))
+            ])
+            X, y = pipeline.fit_resample(X, y)
     
     # Feature selection
     selector = SelectKBest(f_classif, k=k_features)
@@ -361,6 +407,46 @@ def process_data(df, target_col, k_features, balance_data, encode_cat):
         'features': selected_features,
         'dataframe': pd.DataFrame(X_selected, columns=selected_features)
     }
+
+def get_sampling_strategy(y, balance_method):
+    unique, counts = np.unique(y, return_counts=True)
+    majority_count = max(counts)
+    strategy = {}
+
+    for cls, count in zip(unique, counts):
+        if balance_method in ["SMOTE", "SMOTE + OverSampler", "SMOTE + UnderSampling"]:
+            min_samples_required = 6
+            if count < min_samples_required:
+                strategy[cls] = count
+                st.warning(f"⚠️ Class {cls} has only {count} samples. Cannot apply {balance_method}.")
+            else:
+                strategy[cls] = majority_count if balance_method != "RandomUnderSampler" else min(counts)
+        elif balance_method == "RandomOverSampler":
+            strategy[cls] = majority_count
+        elif balance_method == "RandomUnderSampler":
+            strategy[cls] = min(counts)
+    
+    return strategy
+
+def dynamic_neighbors(y):
+    counts = np.bincount(y)
+    min_samples = min(counts[counts > 0])
+    return min(5, min_samples - 1) if min_samples > 1 else 1
+
+def self_healing_smote(X, y, sampling_strategy):
+    try:
+        smote = SMOTE(
+            sampling_strategy=sampling_strategy,
+            k_neighbors=dynamic_neighbors(y),
+            random_state=42
+        )
+        return smote.fit_resample(X, y)
+    except ValueError as e:
+        if "Expected n_neighbors <= n_samples" in str(e):
+            st.warning("⚠️ Adjusting SMOTE parameters due to small sample size")
+            new_strategy = {k: v for k, v in sampling_strategy.items() if v >= 6}
+            return X, y
+        raise e
 
 def display_processing_results():
     data = st.session_state.processed_data
@@ -395,7 +481,6 @@ def data_visualization():
     df = data['dataframe']
     features = data['features']
 
-    # Visualization selection
     viz_type = st.selectbox(
         "Choose Visualization Type",
         ["📈 Distribution Plot", "🌡️ Correlation Heatmap", "🔗 Pair Plot", "🕹️ 3D Scatter"]
