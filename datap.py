@@ -2,11 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-from imblearn.over_sampling import RandomOverSampler, SMOTE
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.pipeline import Pipeline
-from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score, 
@@ -17,493 +14,364 @@ from sklearn.metrics import (
     classification_report,
     roc_auc_score
 )
-from tensorflow import keras
-from tensorflow.keras import layers
 import matplotlib.pyplot as plt
 import seaborn as sns
-import logging
-import time
-from sklearn.impute import SimpleImputer
-import joblib
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# إعداد صفحة Streamlit
+st.set_page_config(
+    page_title="Employee Attrition Predictor",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-def initialize_session_state():
-    session_vars = [
-        'data', 'processed_data', 'model', 'label_encoder',
-        'selected_features', 'target_column', 'test_size',
-        'show_splash', 'num_classes', 'class_distribution'
-    ]
-    for var in session_vars:
-        if var not in st.session_state:
-            st.session_state[var] = None
-
-    if 'show_splash' not in st.session_state:
-        st.session_state.show_splash = True
-
-def inject_custom_css():
-    st.markdown(f"""
-    <style>
-    :root {{
-        --primary: {st.get_option('theme.primaryColor')};
-        --background: {st.get_option('theme.backgroundColor')};
-        --secondary-bg: {st.get_option('theme.secondaryBackgroundColor')};
-        --text: {st.get_option('theme.textColor')};
-    }}
-
-    .main {{
-        background-color: var(--background);
-        color: var(--text);
-        padding-bottom: 100px;
-        position: relative;
-        z-index: 1;
-    }}
-
-    .splash-screen {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: var(--background);
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        opacity: 1;
-        transition: opacity 0.5s ease-out;
-    }}
-
-    .splash-hidden {{
-        opacity: 0;
-        pointer-events: none;
-    }}
-
-    .footer {{
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: var(--secondary-bg);
-        padding: 15px;
-        text-align: center;
-        border-top: 2px solid var(--primary);
-        font-family: 'Arial', sans-serif;
-        font-size: 0.9em;
-        z-index: 0;
-    }}
-
-    .card {{
-        background: var(--secondary-bg);
-        border-radius: 10px;
-        padding: 20px;
-        margin: 10px 0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }}
-
-    .loading-spinner {{
-        width: 50px;
-        height: 50px;
-        border: 5px solid var(--primary);
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: spin 1s linear infinite;
-        margin: 20px auto;
-    }}
-
-    @keyframes spin {{
-        to {{ transform: rotate(360deg); }}
-    }}
-    </style>
-    """, unsafe_allow_html=True)
+# تهيئة حالة الجلسة
+if 'data' not in st.session_state:
+    st.session_state.data = None
+if 'model' not in st.session_state:
+    st.session_state.model = None
+if 'balance_method' not in st.session_state:
+    st.session_state.balance_method = "SMOTE"
+if 'class_distribution' not in st.session_state:
+    st.session_state.class_distribution = {}
 
 def main():
-    st.set_page_config(
-        page_title="AI Data Analyzer Pro",
-        page_icon="🤖",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
+    st.title("🏢 Employee Attrition Prediction System")
     
-    initialize_session_state()
-    inject_custom_css()
-
-    if st.session_state.show_splash:
-        show_splash_screen()
-        time.sleep(2)
-        st.session_state.show_splash = False
-        st.rerun()
-
-    st.title("🤖 AI-Powered Data Analysis & Modeling Pro")
-    
-    st.markdown("""
-    <div class="footer">
-        🚀 Developed by <span style="color: var(--primary); font-weight: bold;">ENG - MOSAB AL-hopishi</span> | 
-        📧 Contact: example@email.com | 
-        🔧 Version 5.1
-    </div>
-    """, unsafe_allow_html=True)
-
-    pages = {
-        "📁 Data Upload": data_upload,
-        "⚙️ Processing": data_processing,
-        "📊 Visualization": data_visualization,
-        "🧠 Model Training": model_training,
-        "🔮 Prediction": prediction
+    menu_options = {
+        "📁 Upload Data": upload_data,
+        "🔍 Data Analysis": data_analysis,
+        "⚙️ Data Processing": data_processing,
+        "🤖 Train Model": train_model,
+        "🔮 Predict": predict
     }
     
-    selected_page = st.sidebar.selectbox("Navigation", list(pages.keys()))
-    pages[selected_page]()
+    page = st.sidebar.selectbox("Navigation", list(menu_options.keys()))
+    menu_options[page]()
 
-def show_splash_screen():
-    st.markdown("""
-    <div class="splash-screen">
-        <div style="text-align: center;">
-            <h1 style="color: var(--primary); margin-bottom: 30px; font-size: 2.5em;">🧠 AI Data Analyzer Pro</h1>
-            <div class="loading-spinner"></div>
-            <p style="color: var(--text); margin-top: 20px; font-size: 1.2em;">Initializing Advanced Components...</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def data_upload():
-    st.header("📁 Data Upload")
+def upload_data():
+    st.header("Data Upload")
+    uploaded_file = st.file_uploader("Upload HR Dataset (CSV)", type="csv")
     
-    with st.container(border=True):
-        uploaded_file = st.file_uploader(
-            "Choose CSV or Excel file",
-            type=["csv", "xlsx"],
-            help="Max file size: 200MB"
-        )
-
     if uploaded_file:
         try:
-            with st.spinner('Analyzing file structure...'):
-                start_time = time.time()
+            df = pd.read_csv(uploaded_file)
+            
+            # التحقق من وجود عمود الهدف
+            if 'Attrition' not in df.columns:
+                st.error("Column 'Attrition' not found in dataset!")
+                return
                 
-                if uploaded_file.name.endswith('.csv'):
-                    df = pd.read_csv(uploaded_file)
-                else:
-                    df = pd.read_excel(uploaded_file)
-                
-                st.session_state.data = df
-                st.session_state.class_distribution = df[df.columns[-1]].value_counts().to_dict()
-                
-                st.success(f"✅ Successfully loaded {len(df)} records")
-                
-                cols = st.columns(4)
-                with cols[0]:
-                    with st.container(border=True):
-                        st.metric("Total Features", df.shape[1])
-                with cols[1]:
-                    with st.container(border=True):
-                        st.metric("Numeric Features", len(df.select_dtypes(include=np.number).columns))
-                with cols[2]:
-                    with st.container(border=True):
-                        st.metric("Categorical Features", len(df.select_dtypes(exclude=np.number).columns))
-                with cols[3]:
-                    with st.container(border=True):
-                        st.metric("Missing Values", df.isnull().sum().sum())
-
-                with st.expander("🔍 Preview First 10 Rows", expanded=False):
-                    st.dataframe(df.head(10), use_container_width=True)
-
+            # تحويل الهدف إلى رقمي
+            df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0}).fillna(df['Attrition'])
+            df['Attrition'] = df['Attrition'].astype(int)
+            
+            st.session_state.data = df
+            st.session_state.class_distribution = df['Attrition'].value_counts().to_dict()
+            
+            st.success(f"✅ Successfully loaded {len(df)} records")
+            
+            # عرض معلومات أساسية
+            cols = st.columns(4)
+            attrition_rate = df['Attrition'].mean()
+            cols[0].metric("Total Employees", df.shape[0])
+            cols[1].metric("Attrition Rate", f"{attrition_rate:.2%}")
+            cols[2].metric("Features", df.shape[1])
+            cols[3].metric("Missing Values", df.isnull().sum().sum())
+            
+            st.dataframe(df.head(), use_container_width=True)
+            
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
-            st.session_state.data = None
+            st.error(f"Error loading file: {str(e)}")
 
-def data_processing():
-    st.header("⚙️ Data Processing")
-    
+def data_analysis():
     if st.session_state.data is None:
-        st.warning("⚠️ Please upload data first!")
+        st.warning("Please upload data first!")
         return
     
     df = st.session_state.data
-
-    with st.form("processing_form"):
-        st.subheader("Processing Configuration")
-        
-        target_col = st.selectbox(
-            "🎯 Select Target Column", 
-            df.columns,
-            help="The variable you want to predict"
-        )
-        st.session_state.target_column = target_col
-
-        col1, col2 = st.columns(2)
-        with col1:
-            with st.container(border=True):
-                st.markdown("### 🧼 Cleaning Options")
-                handle_missing = st.selectbox(
-                    "Missing Values Handling",
-                    ["Drop rows", "Drop columns", "Impute (future)"],
-                    index=0,
-                    disabled=True
-                )
-                
-                encode_cat = st.checkbox(
-                    "Encode Categorical Features", 
-                    value=True,
-                    help="Auto-encode non-numeric columns"
-                )
-
-        with col2:
-            with st.container(border=True):
-                st.markdown("### ⚖️ Advanced Balancing")
-                
-                if st.session_state.class_distribution:
-                    st.write("**Class Distribution:**")
-                    for cls, count in st.session_state.class_distribution.items():
-                        st.write(f"- Class {cls}: {count} samples")
-                
-                if st.session_state.num_classes and st.session_state.num_classes > 2:
-                    balance_options = [
-                        "None",
-                        "RandomOverSampler",
-                        "SMOTE",
-                        "SMOTE + OverSampler"
-                    ]
-                else:
-                    balance_options = [
-                        "None",
-                        "RandomOverSampler",
-                        "RandomUnderSampler",
-                        "SMOTE",
-                        "SMOTE + UnderSampling"
-                    ]
-                    
-                balance_method = st.selectbox(
-                    "Balance Method",
-                    balance_options,
-                    help="Auto-adjusted based on class distribution"
-                )
-                
-                st.markdown("### 🔍 Feature Selection")
-                k_features = st.slider(
-                    "Select Top Features",
-                    min_value=2,
-                    max_value=min(20, df.shape[1]-1),
-                    value=10,
-                    help="ANOVA F-value based selection"
-                )
-
-        with st.expander("⚙️ Advanced Settings"):
-            test_size = st.slider(
-                "Test Set Size (%)",
-                min_value=10,
-                max_value=40,
-                value=20
-            )
-            st.session_state.test_size = test_size / 100
-
-        if st.form_submit_button("🚀 Start Processing", use_container_width=True):
-            try:
-                with st.spinner('Processing data...'):
-                    start_time = time.time()
-                    process_data(df, target_col, k_features, balance_method, encode_cat)
-                    process_time = time.time() - start_time
-                    
-                    st.toast(f'🎉 Processing completed in {process_time:.2f}s!', icon='✅')
-                    display_processing_results()
-
-            except Exception as e:
-                st.error(f"❌ Processing failed: {str(e)}")
-
-    if st.session_state.processed_data is not None:
-        with st.container(border=True):
-            st.markdown("### 📤 Export Processed Data")
-            csv = st.session_state.processed_data['dataframe'].to_csv(index=False).encode()
-            st.download_button(
-                "💾 Download Processed Data",
-                data=csv,
-                file_name="processed_data.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-
-def process_data(df, target_col, k_features, balance_method, encode_cat):
-    processed_df = df.copy()
+    st.header("Data Analysis")
     
-    # Handle missing values using SimpleImputer
-    imputer = SimpleImputer(strategy='median')
-    numeric_cols = processed_df.select_dtypes(include=['int64', 'float64']).columns
-    processed_df[numeric_cols] = imputer.fit_transform(processed_df[numeric_cols])
-    
-    # Encode target
-    le = LabelEncoder()
-    processed_df[target_col] = le.fit_transform(processed_df[target_col])
-    st.session_state.label_encoder = le
-    st.session_state.num_classes = len(np.unique(processed_df[target_col]))
-    
-    # Encode categorical features
-    if encode_cat:
-        cat_cols = processed_df.select_dtypes(include=['object']).columns
-        for col in cat_cols:
-            if col != target_col:
-                processed_df[col] = le.fit_transform(processed_df[col])
-    
-    # Split features and target
-    X = processed_df.drop(columns=[target_col])
-    y = processed_df[target_col]
-    
-    # Standardize numeric features
-    scaler = StandardScaler()
-    X[numeric_cols] = scaler.fit_transform(X[numeric_cols])
-    
-    # Balance classes
-    if balance_method != "None":
-        sampling_strategy = get_sampling_strategy(y, balance_method)
-        
-        if balance_method == "RandomOverSampler":
-            ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
-            X, y = ros.fit_resample(X, y)
-            
-        elif balance_method == "RandomUnderSampler":
-            rus = RandomUnderSampler(sampling_strategy=sampling_strategy, random_state=42)
-            X, y = rus.fit_resample(X, y)
-            
-        elif balance_method == "SMOTE":
-            X, y = self_healing_smote(X, y, sampling_strategy)
-            
-        elif balance_method == "SMOTE + OverSampler":
-            pipeline = Pipeline([
-                ('smote', SMOTE(
-                    sampling_strategy=0.75,
-                    k_neighbors=dynamic_neighbors(y),
-                    random_state=42
-                )),
-                ('over', RandomOverSampler(
-                    sampling_strategy=sampling_strategy,
-                    random_state=42
-                ))
-            ])
-            X, y = pipeline.fit_resample(X, y)
-            
-        elif balance_method == "SMOTE + UnderSampling":
-            pipeline = Pipeline([
-                ('smote', SMOTE(
-                    sampling_strategy=0.75,
-                    k_neighbors=dynamic_neighbors(y),
-                    random_state=42
-                )),
-                ('under', RandomUnderSampler(
-                    sampling_strategy=sampling_strategy,
-                    random_state=42
-                ))
-            ])
-            X, y = pipeline.fit_resample(X, y)
-    
-    # Feature selection
-    selector = SelectKBest(f_classif, k=k_features)
-    X_selected = selector.fit_transform(X, y)
-    selected_features = X.columns[selector.get_support()]
-    
-    # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X_selected, y, 
-        test_size=st.session_state.test_size,
-        random_state=42
-    )
-    
-    # Store processed data
-    st.session_state.processed_data = {
-        'X_train': X_train,
-        'X_test': X_test,
-        'y_train': y_train,
-        'y_test': y_test,
-        'features': selected_features,
-        'dataframe': pd.DataFrame(X_selected, columns=selected_features)
-    }
-
-def get_sampling_strategy(y, balance_method):
-    unique, counts = np.unique(y, return_counts=True)
-    majority_count = max(counts)
-    strategy = {}
-
-    for cls, count in zip(unique, counts):
-        if balance_method in ["SMOTE", "SMOTE + OverSampler", "SMOTE + UnderSampling"]:
-            min_samples_required = 6
-            if count < min_samples_required:
-                strategy[cls] = count
-                st.warning(f"⚠️ Class {cls} has only {count} samples. Cannot apply {balance_method}.")
-            else:
-                strategy[cls] = majority_count if balance_method != "RandomUnderSampler" else min(counts)
-        elif balance_method == "RandomOverSampler":
-            strategy[cls] = majority_count
-        elif balance_method == "RandomUnderSampler":
-            strategy[cls] = min(counts)
-    
-    return strategy
-
-def dynamic_neighbors(y):
-    counts = np.bincount(y)
-    min_samples = min(counts[counts > 0])
-    return min(5, min_samples - 1) if min_samples > 1 else 1
-
-def self_healing_smote(X, y, sampling_strategy):
     try:
-        smote = SMOTE(
-            sampling_strategy=sampling_strategy,
-            k_neighbors=dynamic_neighbors(y),
-            random_state=42
-        )
-        return smote.fit_resample(X, y)
-    except ValueError as e:
-        if "Expected n_neighbors <= n_samples" in str(e):
-            st.warning("⚠️ Adjusting SMOTE parameters due to small sample size")
-            new_strategy = {k: v for k, v in sampling_strategy.items() if v >= 6}
-            return X, y
-        raise e
+        # عرض توزيع الفئات
+        with st.expander("📊 Class Distribution"):
+            fig, ax = plt.subplots()
+            df['Attrition'].value_counts().plot(kind='bar', ax=ax)
+            ax.set_title('Attrition Distribution')
+            ax.set_xlabel('Attrition Status')
+            ax.set_ylabel('Count')
+            st.pyplot(fig)
+        
+        # تحليل توزيع الأعمار
+        with st.expander("📈 Age Distribution"):
+            if 'Age' in df.columns:
+                fig, ax = plt.subplots()
+                sns.histplot(df[df['Attrition'] == 1]['Age'], bins=20, kde=True, color='red', label='Attrition', ax=ax)
+                sns.histplot(df[df['Attrition'] == 0]['Age'], bins=20, kde=True, color='green', label='No Attrition', ax=ax)
+                ax.legend()
+                st.pyplot(fig)
+            else:
+                st.warning("Age column not found in data")
+        
+        # تحليل معدل التنازل حسب القسم
+        with st.expander("📉 Attrition by Department"):
+            if 'Department' in df.columns:
+                department_stats = df.groupby('Department')['Attrition'].mean().reset_index()
+                fig, ax = plt.subplots()
+                sns.barplot(x='Department', y='Attrition', data=department_stats, ax=ax)
+                ax.set_title('Attrition Rate by Department')
+                ax.set_ylabel('Attrition Rate')
+                plt.xticks(rotation=45)
+                st.pyplot(fig)
+            else:
+                st.warning("Department column not found in data")
+        
+        # مصفوفة الارتباط
+        with st.expander("🔗 Correlation Matrix"):
+            numeric_df = df.select_dtypes(include=np.number)
+            if not numeric_df.empty:
+                fig, ax = plt.subplots(figsize=(12,8))
+                sns.heatmap(numeric_df.corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+                st.pyplot(fig)
+            else:
+                st.warning("No numeric columns for correlation analysis")
+                
+    except Exception as e:
+        st.error(f"Analysis error: {str(e)}")
 
-def display_processing_results():
-    data = st.session_state.processed_data
-    
-    st.subheader("📈 Processing Results")
-    cols = st.columns(4)
-    with cols[0]:
-        with st.container(border=True):
-            st.metric("Selected Features", len(data['features']))
-    with cols[1]:
-        with st.container(border=True):
-            st.metric("Training Samples", data['X_train'].shape[0])
-    with cols[2]:
-        with st.container(border=True):
-            st.metric("Test Samples", data['X_test'].shape[0])
-    with cols[3]:
-        with st.container(border=True):
-            st.metric("Class Balance", 
-                    f"{np.unique(data['y_train'], return_counts=True)[1][0]/len(data['y_train']):.1%}")
-
-    with st.expander("📋 Feature List", expanded=False):
-        st.write(data['features'].tolist())
-
-def data_visualization():
-    st.header("📊 Data Visualization")
-    
-    if st.session_state.processed_data is None:
-        st.warning("⚠️ Please process data first!")
+def data_processing():
+    if st.session_state.data is None:
+        st.warning("Please upload data first!")
         return
     
-    data = st.session_state.processed_data
-    df = data['dataframe']
-    features = data['features']
+    st.header("Data Processing")
+    
+    with st.form("processing_form"):
+        st.subheader("Balancing Configuration")
+        
+        # اختيار طريقة الموازنة
+        balance_method = st.selectbox(
+            "Select Balancing Method",
+            ["SMOTE", "RandomOverSampler", "None"],
+            index=0
+        )
+        
+        st.session_state.balance_method = balance_method
+        
+        if st.form_submit_button("Apply Processing"):
+            try:
+                df = st.session_state.data.copy()
+                X = df.drop('Attrition', axis=1)
+                y = df['Attrition']
+                
+                # تطبيق طريقة الموازنة المختارة
+                if balance_method != "None":
+                    if balance_method == "SMOTE":
+                        smote = SMOTE(random_state=42)
+                        X_res, y_res = smote.fit_resample(X, y)
+                    elif balance_method == "RandomOverSampler":
+                        from imblearn.over_sampling import RandomOverSampler
+                        ros = RandomOverSampler(random_state=42)
+                        X_res, y_res = ros.fit_resample(X, y)
+                    
+                    st.session_state.class_distribution = pd.Series(y_res).value_counts().to_dict()
+                    st.success(f"Balancing applied using {balance_method}. New distribution: {st.session_state.class_distribution}")
+                else:
+                    st.session_state.class_distribution = pd.Series(y).value_counts().to_dict()
+                    st.success("Using original imbalanced data")
+                
+            except Exception as e:
+                st.error(f"Processing error: {str(e)}")
 
-    viz_type = st.selectbox(
-        "Choose Visualization Type",
-        ["📈 Distribution Plot", "🌡️ Correlation Heatmap", "🔗 Pair Plot", "🕹️ 3D Scatter"]
-    )
+def preprocess_data():
+    try:
+        df = st.session_state.data.copy()
+        
+        # معالجة البيانات
+        df = df.drop(['EmployeeCount', 'Over18', 'StandardHours'], axis=1, errors='ignore')
+        
+        # ترميز الفئات
+        cat_cols = df.select_dtypes(include=['object', 'category']).columns
+        for col in cat_cols:
+            if col != 'Attrition':
+                df[col] = df[col].astype('category').cat.codes
+        
+        # التعامل مع القيم المفقودة
+        df = df.fillna(df.median(numeric_only=True))
+        
+        # موازنة البيانات
+        X = df.drop('Attrition', axis=1)
+        y = df['Attrition']
+        
+        if st.session_state.balance_method != "None":
+            if st.session_state.balance_method == "SMOTE":
+                smote = SMOTE(random_state=42)
+                X_res, y_res = smote.fit_resample(X, y)
+            elif st.session_state.balance_method == "RandomOverSampler":
+                from imblearn.over_sampling import RandomOverSampler
+                ros = RandomOverSampler(random_state=42)
+                X_res, y_res = ros.fit_resample(X, y)
+        else:
+            X_res, y_res = X, y
+        
+        # تقسيم البيانات
+        X_train, X_test, y_train, y_test = train_test_split(
+            X_res, y_res, 
+            test_size=0.2, 
+            random_state=42,
+            stratify=y_res
+        )
+        
+        # تطبيع البيانات
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+        
+        return X_train, X_test, y_train, y_test, scaler
+        
+    except Exception as e:
+        st.error(f"Preprocessing error: {str(e)}")
+        return None, None, None, None, None
 
-    if viz_type == "📈 Distribution Plot":
-        selected_feature = st.selectbox("Select Feature", features)
+def train_model():
+    if st.session_state.data is None:
+        st.warning("Please upload data first!")
+        return
+    
+    df = st.session_state.data
+    st.header("Model Training")
+    
+    with st.spinner('Preprocessing data...'):
+        X_train, X_test, y_train, y_test, scaler = preprocess_data()
+        
+    if X_train is None:
+        return
+    
+    # إعداد النموذج
+    with st.form("training_form"):
+        st.subheader("Model Configuration")
+        
+        cols = st.columns(2)
+        n_estimators = cols[0].slider("Number of Trees", 50, 500, 200)
+        max_depth = cols[1].slider("Max Depth", 2, 30, 10)
+        class_weight = cols[0].selectbox("Class Weight", ["balanced", "None"])
+        bootstrap = cols[1].checkbox("Bootstrap", value=True)
+        
+        if st.form_submit_button("Train Model"):
+            try:
+                model = RandomForestClassifier(
+                    n_estimators=n_estimators,
+                    max_depth=max_depth,
+                    class_weight='balanced' if class_weight == "balanced" else None,
+                    bootstrap=bootstrap,
+                    random_state=42
+                )
+                model.fit(X_train, y_train)
+                st.session_state.model = model
+                st.session_state.scaler = scaler
+                evaluate_model(model, X_test, y_test)
+                
+            except Exception as e:
+                st.error(f"Training error: {str(e)}")
+
+def evaluate_model(model, X_test, y_test):
+    try:
+        st.subheader("Model Evaluation")
+        y_pred = model.predict(X_test)
+        y_proba = model.predict_proba(X_test)[:, 1]
+        
+        # حساب المقاييس
+        metrics = {
+            "Accuracy": accuracy_score(y_test, y_pred),
+            "Precision": precision_score(y_test, y_pred),
+            "Recall": recall_score(y_test, y_pred),
+            "F1 Score": f1_score(y_test, y_pred),
+            "AUC-ROC": roc_auc_score(y_test, y_proba)
+        }
+        
+        # عرض النتائج
+        cols = st.columns(5)
+        for i, (name, value) in enumerate(metrics.items()):
+            cols[i].metric(name, f"{value:.2%}" if isinstance(value, float) else value)
+        
+        # عرض مصفوفة الارتباك
+        st.subheader("Confusion Matrix")
+        cm = confusion_matrix(y_test, y_pred)
         fig, ax = plt.subplots()
-        sns.histplot(df[selected_feature], kde=True, ax=ax)
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
+        ax.set_xlabel('Predicted')
+        ax.set_ylabel('Actual')
         st.pyplot(fig)
+        
+        # عرض تقرير التصنيف
+        st.subheader("Classification Report")
+        report = classification_report(y_test, y_pred, output_dict=True)
+        st.dataframe(pd.DataFrame(report).transpose().style.format("{:.2%}"))
+        
+        # عرض العوامل المؤثرة
+        st.subheader("Top Important Features")
+        feature_importance = pd.Series(model.feature_importances_, 
+                                     index=st.session_state.data.drop('Attrition', axis=1).columns)
+        top_features = feature_importance.sort_values(ascending=False)[:10]
+        st.bar_chart(top_features)
+        
+    except Exception as e:
+        st.error(f"Evaluation error: {str(e)}")
 
-    elif viz_type == "🌡️ Correlation Heatmap":
-        fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(df.corr(), annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
-        st.pyplot(fig)
+def predict():
+    if st.session_state.model is None:
+        st.warning("Please train model first!")
+        return
+    
+    st.header("Predict Attrition")
+    df = st.session_state.data
+    
+    try:
+        # نموذج إدخال البيانات
+        inputs = {}
+        features = df.drop('Attrition', axis=1).columns
+        
+        cols = st.columns(3)
+        for i, col in enumerate(features):
+            with cols[i%3]:
+                if df[col].dtype == 'object':
+                    inputs[col] = st.selectbox(col, df[col].unique())
+                else:
+                    inputs[col] = st.number_input(col, value=df[col].median())
+        
+        if st.button("Predict"):
+            # تحويل المدخلات
+            input_df = pd.DataFrame([inputs])
+            cat_cols = input_df.select_dtypes(include=['object', 'category']).columns
+            for col in cat_cols:
+                input_df[col] = input_df[col].astype('category').cat.codes
+            
+            # تطبيق التطبيع
+            scaled_input = st.session_state.scaler.transform(input_df)
+            
+            # التنبؤ
+            model = st.session_state.model
+            prediction = model.predict(scaled_input)[0]
+            proba = model.predict_proba(scaled_input)[0][1]
+            
+            # عرض النتائج
+            st.subheader("Prediction Result")
+            if prediction == 1:
+                st.error(f"🔥 High Risk of Attrition ({proba:.2%} probability)")
+            else:
+                st.success(f"✅ Low Risk of Attrition ({1-proba:.2%} probability)")
+                
+            # عرض تفسير النموذج
+            st.subheader("Key Influencing Factors")
+            feature_importance = pd.Series(model.feature_importances_, 
+                                         index=df.drop('Attrition', axis=1).columns)
+            top_features = feature_importance.sort_values(ascending=False)[:3]
+            
+            for feature, importance in top_features.items():
+                value = inputs[feature]
+                st.write(f"• **{feature}**: {value} (Impact: {importance:.2f})")
+                
+    except Exception as e:
+        st.error(f"Prediction error: {str(e)}")
 
-    elif viz_type == "
+if __name__ == "__main__":
+    main()
