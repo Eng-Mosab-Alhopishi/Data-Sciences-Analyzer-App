@@ -169,7 +169,7 @@ Here’s an overview of the project structure:
 ```
 repository-name/
 │
-├── main.py                # Main application script
+├── datap.py                # Main application script
 ├── requirements.txt       # List of required libraries
 ├── README.md              # Project documentation
 ├── LICENSE                # License file
