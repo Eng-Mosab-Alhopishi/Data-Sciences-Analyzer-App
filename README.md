@@ -46,30 +46,6 @@ This is a **Python-based application** designed for data processing, visualizati
 
 ---
 
-## Screenshots
-
-### Main Interface
-
-![Main Interface](images/photo1.png)
-
-### Data Processing
-
-![Data Processing](images/photo2.png)
-
-### Model Training
-
-![Model Training](images/photo4.png)
-
-### Data Visualization
-
-![Data Visualization](images/photo3.png)
-
-### Prediction Tab
-
-![Prediction Tab](images/photo5.png)
-
----
-
 ## Requirements
 
 To run this application, you need the following:
@@ -96,12 +72,12 @@ Follow these steps to set up and run the application:
 First, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/Eng-Mosab-Alhopishi/Data-Sciences-Analyzer-App.git
-# git clone https://github.com/radanpro/data-science.git
+
+git clone https://github.com/radanpro/data-science.git
 ```
 
 <!-- ```bash
-git clone https://github.com/radanpro/data-science.git
+ # git clone https://github.com/Eng-Mosab-Alhopishi/Data-Sciences-Analyzer-App.git
 ``` -->
 
 ### 2. Navigate to the Project Directory
@@ -154,7 +130,7 @@ pip install pandas scikit-learn tensorflow matplotlib seaborn imblearn numpy
 Once the libraries are installed, run the application:
 
 ```bash
-python datap.py
+streamlit run datap.py
 ```
 
 ---
@@ -219,43 +195,3 @@ Contributions are welcome! If you'd like to contribute, please follow these step
 3. Commit your changes.
 4. Push your changes to the branch.
 5. Submit a pull request.
-
----
-
-## Contact
-
-For any questions or feedback, feel free to reach out:
-
-- **Email**: your-email@example.com
-- **GitHub**: your-username
-
----
-
-### How to Use This `README.md`
-
-1. Copy the content above into a file named `README.md` in your project folder.
-2. Replace placeholders like `username`, `repository-name`, and `your-email@example.com` with your actual details.
-3. Add screenshots of your application to the `images/` folder and link them in the **Screenshots** section.
-4. Push the updated `README.md` to your GitHub repository.
-
----
-
-### Example of a Screenshot Section
-
-If you want to add screenshots, you can use the following format in the **Screenshots** section:
-
-```markdown
-## Screenshots
-
-### Main Interface
-
-![Main Interface](images/main_interface.png)
-
-### Data Visualization
-
-![Data Visualization](images/visualization.png)
-
-### Prediction Tab
-
-![Prediction Tab](images/prediction_tab.png)
-```
