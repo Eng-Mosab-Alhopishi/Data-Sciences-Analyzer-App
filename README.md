@@ -85,7 +85,7 @@ git clone https://github.com/radanpro/data-science.git
 Move into the project folder:
 
 ```bash
-cd Data-Sciences-Analyzer-App
+cd data-Science
 ```
 
 ### 3. Set Up a Virtual Environment (Optional but Recommended)
