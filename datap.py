@@ -16,6 +16,9 @@ from sklearn.metrics import (
 )
 import matplotlib.pyplot as plt
 import seaborn as sns
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.optimizers import Adam
 
 # إعداد صفحة Streamlit
 st.set_page_config(
@@ -232,6 +235,16 @@ def preprocess_data():
         st.error(f"Preprocessing error: {str(e)}")
         return None, None, None, None, None
 
+def build_nn_model(input_dim):
+    model = Sequential()
+    model.add(Dense(64, input_dim=input_dim, activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(Dense(32, activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy', metrics=['accuracy'])
+    return model
+
 def train_model():
     if st.session_state.data is None:
         st.warning("Please upload data first!")
@@ -250,22 +263,40 @@ def train_model():
     with st.form("training_form"):
         st.subheader("Model Configuration")
         
-        cols = st.columns(2)
-        n_estimators = cols[0].slider("Number of Trees", 50, 500, 200)
-        max_depth = cols[1].slider("Max Depth", 2, 30, 10)
-        class_weight = cols[0].selectbox("Class Weight", ["balanced", "None"])
-        bootstrap = cols[1].checkbox("Bootstrap", value=True)
+        model_type = st.selectbox("Select Model Type", ["Random Forest", "Neural Network"])
+        
+        if model_type == "Random Forest":
+            cols = st.columns(2)
+            n_estimators = cols[0].slider("Number of Trees", 50, 500, 200)
+            max_depth = cols[1].slider("Max Depth", 2, 30, 10)
+            class_weight = cols[0].selectbox("Class Weight", ["balanced", "None"])
+            bootstrap = cols[1].checkbox("Bootstrap", value=True)
+        else:
+            epochs = st.slider("Epochs", 10, 100, 50)
+            batch_size = st.slider("Batch Size", 16, 128, 32)
         
         if st.form_submit_button("Train Model"):
             try:
-                model = RandomForestClassifier(
-                    n_estimators=n_estimators,
-                    max_depth=max_depth,
-                    class_weight='balanced' if class_weight == "balanced" else None,
-                    bootstrap=bootstrap,
-                    random_state=42
-                )
-                model.fit(X_train, y_train)
+                if model_type == "Random Forest":
+                    model = RandomForestClassifier(
+                        n_estimators=n_estimators,
+                        max_depth=max_depth,
+                        class_weight='balanced' if class_weight == "balanced" else None,
+                        bootstrap=bootstrap,
+                        random_state=42
+                    )
+                    model.fit(X_train, y_train)
+                else:
+                    model = build_nn_model(X_train.shape[1])
+                    history = model.fit(
+                        X_train, y_train,
+                        validation_split=0.2,
+                        epochs=epochs,
+                        batch_size=batch_size,
+                        verbose=0
+                    )
+                    st.session_state.history = history
+                
                 st.session_state.model = model
                 st.session_state.scaler = scaler
                 evaluate_model(model, X_test, y_test)
@@ -276,8 +307,14 @@ def train_model():
 def evaluate_model(model, X_test, y_test):
     try:
         st.subheader("Model Evaluation")
-        y_pred = model.predict(X_test)
-        y_proba = model.predict_proba(X_test)[:, 1]
+        
+        if isinstance(model, Sequential):  # Neural Network
+            y_pred_probs = model.predict(X_test)
+            y_pred = (y_pred_probs > 0.5).astype(int)
+            y_proba = y_pred_probs.flatten()
+        else:  # Random Forest
+            y_pred = model.predict(X_test)
+            y_proba = model.predict_proba(X_test)[:, 1]
         
         # حساب المقاييس
         metrics = {
@@ -307,12 +344,13 @@ def evaluate_model(model, X_test, y_test):
         report = classification_report(y_test, y_pred, output_dict=True)
         st.dataframe(pd.DataFrame(report).transpose().style.format("{:.2%}"))
         
-        # عرض العوامل المؤثرة
-        st.subheader("Top Important Features")
-        feature_importance = pd.Series(model.feature_importances_, 
-                                     index=st.session_state.data.drop('Attrition', axis=1).columns)
-        top_features = feature_importance.sort_values(ascending=False)[:10]
-        st.bar_chart(top_features)
+        # عرض العوامل المؤثرة (لـ Random Forest فقط)
+        if not isinstance(model, Sequential):
+            st.subheader("Top Important Features")
+            feature_importance = pd.Series(model.feature_importances_, 
+                                         index=st.session_state.data.drop('Attrition', axis=1).columns)
+            top_features = feature_importance.sort_values(ascending=False)[:10]
+            st.bar_chart(top_features)
         
     except Exception as e:
         st.error(f"Evaluation error: {str(e)}")
@@ -350,28 +388,34 @@ def predict():
             
             # التنبؤ
             model = st.session_state.model
-            prediction = model.predict(scaled_input)[0]
-            proba = model.predict_proba(scaled_input)[0][1]
+            if isinstance(model, Sequential):  # Neural Network
+                prediction_proba = model.predict(scaled_input)[0][0]
+                prediction = 1 if prediction_proba > 0.5 else 0
+            else:  # Random Forest
+                prediction = model.predict(scaled_input)[0]
+                prediction_proba = model.predict_proba(scaled_input)[0][1]
             
             # عرض النتائج
             st.subheader("Prediction Result")
             if prediction == 1:
-                st.error(f"🔥 High Risk of Attrition ({proba:.2%} probability)")
+                st.error(f"🔥 High Risk of Attrition ({prediction_proba:.2%} probability)")
             else:
-                st.success(f"✅ Low Risk of Attrition ({1-proba:.2%} probability)")
+                st.success(f"✅ Low Risk of Attrition ({1-prediction_proba:.2%} probability)")
                 
-            # عرض تفسير النموذج
-            st.subheader("Key Influencing Factors")
-            feature_importance = pd.Series(model.feature_importances_, 
-                                         index=df.drop('Attrition', axis=1).columns)
-            top_features = feature_importance.sort_values(ascending=False)[:3]
-            
-            for feature, importance in top_features.items():
-                value = inputs[feature]
-                st.write(f"• **{feature}**: {value} (Impact: {importance:.2f})")
+            # عرض تفسير النموذج (لـ Random Forest فقط)
+            if not isinstance(model, Sequential):
+                st.subheader("Key Influencing Factors")
+                feature_importance = pd.Series(model.feature_importances_, 
+                                            index=df.drop('Attrition', axis=1).columns)
+                top_features = feature_importance.sort_values(ascending=False)[:3]
+                
+                for feature, importance in top_features.items():
+                    value = inputs[feature]
+                    st.write(f"• **{feature}**: {value} (Impact: {importance:.2f})")
                 
     except Exception as e:
         st.error(f"Prediction error: {str(e)}")
 
 if __name__ == "__main__":
     main()
+
